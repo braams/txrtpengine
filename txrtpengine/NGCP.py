@@ -19,8 +19,8 @@ class NGControlProtocol(DatagramProtocol):
         return '%s_%s' % (id(self), self.count)
 
     def send(self, data):
-        log.msg('Sending %r to %s' % (data, self.addr))
         self.transport.write(data)
+        log.msg('Sent %r to %s' % (data, self.addr))
 
     def command(self, cmd):
         c = self.gencookie()
@@ -149,18 +149,23 @@ class NGControlProtocol(DatagramProtocol):
         return self.command(cmd)
 
 
+class NGCPClient(NGControlProtocol):
+    def __init__(self, addr):
+        NGControlProtocol.__init__(self, addr)
+        reactor.listenUDP(0, self)
+
+
 if __name__ == '__main__':
     import sys
 
     log.startLogging(sys.stdout)
-    p = NGControlProtocol(('172.24.4.33', 2223))
-    reactor.listenUDP(0, p)
+    c = NGCPClient(('172.24.4.33', 2223))
 
 
     def onResponse(data):
         print data
 
 
-    p.ping().addCallback(onResponse)
+    c.ping().addCallback(onResponse)
 
     reactor.run()
