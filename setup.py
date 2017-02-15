@@ -6,5 +6,6 @@ setup(name='txrtpengine',
       author='Max Nesterov',
       author_email='braams@braams.ru',
       url='https://github.com/braams/txrtpengine/',
-      packages=['txrtpengine',],
-     )
+      packages=['txrtpengine'],
+      install_requires=['Twisted', 'better_bencode'],
+      )
