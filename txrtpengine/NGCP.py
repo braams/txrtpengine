@@ -57,7 +57,7 @@ class NGControlProtocol(DatagramProtocol):
         return self.command(cmd)
 
     def offer(self, sdp, callid, fromtag, viabranch=None, flags=[], replace=["origin", "session connection"], ice=None,
-              transportprotocol=None, dtls=None):
+              transportprotocol=None, rtcpmux=None, dtls=None):
         cmd = {'command': 'offer',
                'call-id': callid,
                'from-tag': fromtag,
@@ -73,20 +73,21 @@ class NGControlProtocol(DatagramProtocol):
             cmd['ICE'] = ice
         if transportprotocol:
             cmd['transport protocol'] = transportprotocol
+        if rtcpmux:
+            cmd['rtcp-mux'] = rtcpmux
         if dtls:
             cmd['DTLS'] = dtls
 
         return self.command(cmd)
 
     def answer(self, sdp, callid, fromtag, totag, viabranch=None, flags=[], replace=["origin", "session connection"],
-               ice=None, transportprotocol=None, dtls=None):
+               ice=None, transportprotocol=None, rtcpmux=None, dtls=None):
         cmd = {'command': 'answer',
                'call-id': callid,
                'from-tag': fromtag,
                'to-tag': totag,
                'sdp': sdp
                }
-
         if viabranch:
             cmd['via-branch'] = viabranch
         if flags:
@@ -97,6 +98,8 @@ class NGControlProtocol(DatagramProtocol):
             cmd['ICE'] = ice
         if transportprotocol:
             cmd['transport protocol'] = transportprotocol
+        if rtcpmux:
+            cmd['rtcp-mux'] = rtcpmux
         if dtls:
             cmd['DTLS'] = dtls
 
