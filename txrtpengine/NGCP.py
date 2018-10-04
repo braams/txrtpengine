@@ -1,9 +1,8 @@
-from twisted.internet.protocol import DatagramProtocol
-from twisted.internet import reactor
-from twisted.internet import defer
-from twisted.python import log
-
 import better_bencode as bencode
+from twisted.internet import defer
+from twisted.internet import reactor
+from twisted.internet.protocol import DatagramProtocol
+from twisted.python import log
 
 
 class NGControlProtocol(DatagramProtocol):
@@ -37,7 +36,6 @@ class NGControlProtocol(DatagramProtocol):
         return df
 
     def startProtocol(self):
-
         self.transport.connect(*self.addr)
         for msg in self.cache:
             self.send(msg)
@@ -57,7 +55,7 @@ class NGControlProtocol(DatagramProtocol):
         return self.command(cmd)
 
     def offer(self, sdp, callid, fromtag, viabranch=None, flags=[], replace=["origin", "session connection"], ice=None,
-              transportprotocol=None, rtcpmux=None, dtls=None):
+              transportprotocol=None, rtcpmux=None, dtls=None, sdes=None, codec={}):
         cmd = {'command': 'offer',
                'call-id': callid,
                'from-tag': fromtag,
@@ -77,11 +75,15 @@ class NGControlProtocol(DatagramProtocol):
             cmd['rtcp-mux'] = rtcpmux
         if dtls:
             cmd['DTLS'] = dtls
+        if sdes:
+            cmd['SDES'] = sdes
+        if codec:
+            cmd['codec'] = codec
 
         return self.command(cmd)
 
     def answer(self, sdp, callid, fromtag, totag, viabranch=None, flags=[], replace=["origin", "session connection"],
-               ice=None, transportprotocol=None, rtcpmux=None, dtls=None):
+               ice=None, transportprotocol=None, rtcpmux=None, dtls=None, sdes=None, codec={}):
         cmd = {'command': 'answer',
                'call-id': callid,
                'from-tag': fromtag,
@@ -102,6 +104,10 @@ class NGControlProtocol(DatagramProtocol):
             cmd['rtcp-mux'] = rtcpmux
         if dtls:
             cmd['DTLS'] = dtls
+        if sdes:
+            cmd['SDES'] = sdes
+        if codec:
+            cmd['codec'] = codec
 
         return self.command(cmd)
 
@@ -162,13 +168,16 @@ if __name__ == '__main__':
     import sys
 
     log.startLogging(sys.stdout)
-    c = NGCPClient(('172.24.4.33', 2223))
 
 
-    def onResponse(data):
-        print data
+    def test():
+        c = NGCPClient(('127.0.0.1', 16222))
+
+        def onResponse(data):
+            log.msg("response: %s" % data)
+
+        c.ping().addBoth(onResponse)
 
 
-    c.ping().addCallback(onResponse)
-
+    reactor.callWhenRunning(test)
     reactor.run()
